@@ -1,9 +1,18 @@
-import pg from 'pg';
-import dotenv from 'dotenv';
-dotenv.config(); // Para caragar las variables
-const { Client } = pg;
+const { Pool } = require('pg');
+const dotenv = require('dotenv');
 
-const client = new Client({
+dotenv.config(); // Para caragar las variables
+
+/*Verifica las variables de entorno
+console.log('Database Config:', {
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT,
+});*/
+
+const pool = new Pool({
   user: process.env.PGUSER,
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -13,19 +22,14 @@ const client = new Client({
 
 async function connect() {
   try {
-    await client.connect();
-    console.log('Conectada a PostgreSQL');
-
-    const res = await client.query('SELECT * FROM trajectories LIMIT 10');
-    console.log('Datos de la tabla taxis:', res.rows);
-
-    return client;
+    // Consulta para verificar la conexión
+    const res = await pool.query('SELECT * FROM trajectories LIMIT 10');
+    console.log('Datos de la tabla trajectories:', res.rows);
+    return pool;
   } catch (error) {
-    console.error('Error de conexión a PostgresSQL');
+    console.error('Error de conexión a PostgresSQL', error);
     throw error;
-  } finally {
-    await client.end();
   }
 }
 
-export { client, connect };
+module.exports = { pool, connect };

@@ -17,6 +17,9 @@
   - Creación tabla `trajectories`.
   - Cargar datos en la tabla.
   - Implementación del servidor con Express.
+- Endpoint para listar taxis con paginación (`GET /api/taxis`)
+- Documentación Swagger para GET /api/taxis.
+- Pruebas para el endpoint GET /api/taxis, incluyendo la validación de parámetros de consulta no válidos.
 
 ### Changed
 
@@ -49,3 +52,11 @@
 - Cargar información a la base de datos:
   - Se han considerado las relaciones entre las tablas según el diagrama proporcionado.
 - Implementación del servidor con Express.
+
+## [19/07/2024]
+
+### Added
+
+- Endpoint para listar taxis con paginación (`GET /api/taxis`)
+- Documentación Swagger para el endpoint de taxis.
+- Prueba para getTaxis, incluyendo la validación de parámetros de consulta no válidos.
