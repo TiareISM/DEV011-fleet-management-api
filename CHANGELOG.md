@@ -1,46 +1,45 @@
 # Changelog
 
+Todos los cambios de este proyecto se documentarán en este archivo <3.
+
 ## [Unreleased]
 
 ### Added
 
-- Inicialización del proyecto
-- Creación de archivo `index.js`
-- Configuración de `package.json`
-- Creación de la rama `conexion-a-db`
-- Conexión a la base de datos PostgresSQL:
-  - Configuración de conexión utilizando variables de enetorno.
-  - Verficar la conexión a la base de datos.
-- Cargar la información de los archivos SQL en PostgreSQL:
-  - Creación tabla `taxis`.
-  - Cragar datos en la tabla.
-  - Creación tabla `trajectories`.
-  - Cargar datos en la tabla.
-  - Implementación del servidor con Express.
-- Endpoint para listar taxis con paginación (`GET /api/taxis`)
-- Documentación Swagger para GET /api/taxis.
-- Pruebas para el endpoint GET /api/taxis, incluyendo la validación de parámetros de consulta no válidos.
+- **GET** `/api/taxis`: Endpoint para listar taxis con paginación.
+  - Documentación Swagger actualizada.
+  - Pruebas unitarias, incluyendo validación de parámetros de consulta no válidos.
+- **GET** `/api/taxis/{id}/locations`: Endpoint para obtener ubicación de un taxi por ID.
+  - Documentación Swagger actualizada.
+  - Pruebas implementadas, cubriendo ubicaciones encontradas, no encontradas y parámetros de consulta no válidos.
 
 ### Changed
 
-- N/A
+- Mocking de pruebas para `getTaxis` y `getTaxiLocations` para evitar consultas a la DB real.
 
 ### Fixed
 
-- N/A
+- Mejorando manejo de errores y respuestas en los endpoints.
 
 ### Removed
 
 - N/A
 
-## [17/07/2024]
+## [20/07/2024]
 
 ### Added
 
-- Inicialización del proyecto
-- Creación de archivo `index.js`
-- Configuración de `package.json`
-- Creación de la rama `conexion-a-db`
+- **GET** `/api/taxis/{id}/locations`: Endpoint para obtener ubicaciones de un taxi por ID.
+  - Documentación Swagger añadida.
+  - Pruebas implementadas, cubriendo ubicaciones encontradas, no encontradas, y parámetros de consulta no válidos.
+
+## [19/07/2024]
+
+### Added
+
+- Endpoint para listar taxis con paginación (`GET /api/taxis`)
+- Documentación Swagger para el endpoint de taxis.
+- Prueba para getTaxis, incluyendo la validación de parámetros de consulta no válidos.
 
 ## [18/07/2024]
 
@@ -53,10 +52,12 @@
   - Se han considerado las relaciones entre las tablas según el diagrama proporcionado.
 - Implementación del servidor con Express.
 
-## [19/07/2024]
+## [17/07/2024]
 
 ### Added
 
-- Endpoint para listar taxis con paginación (`GET /api/taxis`)
-- Documentación Swagger para el endpoint de taxis.
-- Prueba para getTaxis, incluyendo la validación de parámetros de consulta no válidos.
+- Inicialización del proyecto
+- Creación de archivo `index.js`
+- Configuración de `package.json`
+- Creación de la rama `develop` desde `main` para seguir el flujo de trabajo GitFlow.
+- Creación de la rama `conexion-a-db` para implementar la conexión a la base de datos.
