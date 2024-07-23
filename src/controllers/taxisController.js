@@ -73,4 +73,52 @@ module.exports = {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },
+  getTaxiLastLocation: async (req, res) => {
+    // Obtener el id desde los parámetros
+    const taxiId = parseInt(req.params.id, 10);
+    // validar que ID sea un número valido.
+    if (isNaN(taxiId)) {
+      return res.status(400).json({ error: 'Invalid taxi Id' });
+    }
+    console.log('este es el id del taxi:', taxiId);
+    // Obtener los parámetros de la consulta page y limit
+    const limit = parseInt(req.query.limit, 10);
+    const page = parseInt(req.query.page, 10);
+
+    console.log(`limit: ${limit}, page: ${page}`);
+
+    // Verficar que limit u offset sean números válidos
+    if (isNaN(limit) || isNaN(page)) {
+      console.log('Invalid query parameters detected');
+      return res.status(400).json({ error: 'Invalid query parameters' });
+    }
+
+    const offset = (page - 1) * limit;
+    console.log(`offset: ${offset}`);
+
+    try {
+      const query = `
+      SELECT t.id, t.plate, tr.latitude, tr.longitude, tr.date
+      FROM taxis t
+      JOIN trajectories tr ON t.id = tr.taxi_id
+      WHERE t.id = $1
+      AND tr.date = (
+      SELECT MAX(date)
+      FROM trajectories
+      WHERE taxi_id = t.id
+      )
+      ORDER BY tr.date DESC
+      LIMIT $2 OFFSET $3
+      `;
+      const result = await db.pool.query(query, [taxiId, limit, offset]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'No locations found for taxi' });
+      }
+      console.log('resultado de:', result);
+      res.status(200).json(result.rows);
+    } catch (error) {
+      console.error('Error getting last taxi locations:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
 };

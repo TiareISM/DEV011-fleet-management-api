@@ -12,10 +12,13 @@ Todos los cambios de este proyecto se documentarán en este archivo <3.
 - **GET** `/api/taxis/{id}/locations`: Endpoint para obtener ubicación de un taxi por ID.
   - Documentación Swagger actualizada.
   - Pruebas implementadas, cubriendo ubicaciones encontradas, no encontradas y parámetros de consulta no válidos.
+- **GET** `/api/taxis/{id}/location/latest`: Endpoint para obtener la última ubicación de un taxi por ID.
+  - Documentación Swagger actualizada.
+  - Pruebas implementadas, cubriendo ubicaciones encontradas, no encontradas y parámetros de consulta no válidos.
 
 ### Changed
 
-- Mocking de pruebas para `getTaxis` y `getTaxiLocations` para evitar consultas a la DB real.
+- Mocking de pruebas para `getTaxis` , `getTaxiLocations` y `getTaxiLastLocation` para evitar consultas a la DB real.
 
 ### Fixed
 
@@ -24,6 +27,14 @@ Todos los cambios de este proyecto se documentarán en este archivo <3.
 ### Removed
 
 - N/A
+
+## [22/07/2024]
+
+### Added
+
+- **GET** `/api/taxis/{id}/location/latest`: Endpoint para obtener la última ubicacion de un taxi por ID.
+  - Documentación Swagger añadida.
+  - Pruebas implementadas, cubriendo ubicaciones encontradas, no encontradas, y parámetros de consulta no válidos.
 
 ## [20/07/2024]
 
