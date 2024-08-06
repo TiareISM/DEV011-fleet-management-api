@@ -117,7 +117,7 @@ module.exports = {
       console.log('resultado de:', result);
       res.status(200).json(result.rows);
     } catch (error) {
-      console.error('Error getting last taxi locations:', error);
+      console.error('Error getting last taxi locations:', error.message);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },

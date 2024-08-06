@@ -1,4 +1,4 @@
-const { loadTrajectoriesData } = require('./src/scripts/loadTrajectoriesData');
+const { loadTrajectoriesData } = require('./src/scripts/trajectoriesDataLoad');
 
 loadTrajectoriesData()
   .then(() => console.log('Datos de trayectorias cargados exitosamente'))

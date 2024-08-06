@@ -1,46 +1,136 @@
-/*const { loadTrajectoriesData } = require('../src/scripts/loadTrajectoriesData');
+const { loadTrajectoriesData } = require('../src/scripts/trajectoriesDataLoad');
 const fs = require('node:fs');
 const path = require('node:path');
 const { pool } = require('../src/database/db');
+const { taxiIdExists } = require('../src/scripts/taxiIdExists');
 
-jest.mock('../src/database/db'); // Simulamos db.pool.query
+jest.mock('node:fs', () => ({
+  readdirSync: jest.fn(),
+  statSync: jest.fn(),
+  readFileSync: jest.fn(),
+}));
+
+jest.mock('../src/database/db', () => ({
+  pool: {
+    query: jest.fn(),
+  },
+}));
+
+jest.mock('node:path', () => {
+  const originalPath = jest.requireActual('node:path');
+  return {
+    ...originalPath,
+    join: jest.fn((...args) => originalPath.join(...args)),
+    extname: jest.fn((...args) => originalPath.extname(...args)),
+  };
+});
+
+jest.mock('../src/scripts/taxiIdExists', () => ({
+  taxiIdExists: jest.fn(),
+}));
 
 describe('loadTrajectoriesData', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should handle empty file', async () => {
-    // Simulamos un archivo vacío
-    fs.readFileSync = jest.fn().mockReturnValue('');
+  it('should load trajectories data successfully', async () => {
+    const mockTrajectoriesDirPath = '/mock/path/to/trajectories';
+    const mockFiles = ['file1.txt', 'file2.txt'];
+    const mockFileData =
+      '1,2023-01-01,40.7128,-74.0060\n2,2023-01-02,34.0522,-118.2437';
+
+    path.join.mockReturnValue(mockTrajectoriesDirPath);
+    path.extname.mockReturnValue('.txt');
+    fs.readdirSync.mockReturnValue(mockFiles);
+    fs.statSync.mockReturnValue({ isFile: () => true });
+    fs.readFileSync.mockReturnValue(mockFileData);
+    taxiIdExists.mockResolvedValue(true);
+    pool.query.mockResolvedValue({});
 
     await loadTrajectoriesData();
 
-    expect(pool.query).not.toHaveBeenCalled(); // Verificamos que no se ejecutó ninguna consulta
-  });
-
-  it('should handle invalid taxi_id', async () => {
-    // Simulamos un archivo con un taxi_id inválido
-    fs.readFileSync = jest.fn().mockReturnValue('invalid,date,lat,lon');
-
-    await loadTrajectoriesData();
-
-    expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('ID de taxi inválido')
+    expect(fs.readdirSync).toHaveBeenCalledWith(mockTrajectoriesDirPath);
+    expect(fs.readFileSync).toHaveBeenCalledWith(
+      path.join(mockTrajectoriesDirPath, 'file1.txt'),
+      'utf-8'
     );
-    expect(pool.query).not.toHaveBeenCalled();
+    expect(fs.readFileSync).toHaveBeenCalledWith(
+      path.join(mockTrajectoriesDirPath, 'file2.txt'),
+      'utf-8'
+    );
+    expect(pool.query).toHaveBeenCalledWith('BEGIN');
+    expect(pool.query).toHaveBeenCalledWith(
+      'INSERT INTO trajectories (taxi_id, date, latitude, longitude) VALUES ($1, $2, $3, $4)',
+      [1, '2023-01-01', 40.7128, -74.006]
+    );
+    expect(pool.query).toHaveBeenCalledWith('COMMIT');
   });
 
-  it('should handle non-existent taxi_id', async () => {
-    // Simulamos un archivo con un taxi_id que no existe
-    fs.readFileSync = jest.fn().mockReturnValue('1,date,lat,lon');
-    pool.query.mockResolvedValueOnce({ rowCount: 0 }); // Simulamos que el taxi_id no existe
+  it('should handle empty files correctly', async () => {
+    const mockTrajectoriesDirPath = '/mock/path/to/trajectories';
+    const mockFiles = ['file1.txt', 'file2.txt'];
+    const mockFileData = '';
+
+    path.join.mockReturnValue(mockTrajectoriesDirPath);
+    fs.readdirSync.mockReturnValue(mockFiles);
+    fs.statSync.mockReturnValue({ isFile: () => true });
+    fs.readFileSync.mockReturnValue(mockFileData);
+    taxiIdExists.mockResolvedValue(true);
+    pool.query.mockResolvedValue({});
 
     await loadTrajectoriesData();
 
-    expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining('El taxi_id no existe')
+    expect(fs.readdirSync).toHaveBeenCalledWith(mockTrajectoriesDirPath);
+    expect(fs.readFileSync).toHaveBeenCalledWith(
+      path.join(mockTrajectoriesDirPath, 'file1.txt'),
+      'utf-8'
     );
-    expect(pool.query).toHaveBeenCalledTimes(2); // Una vez para verificar existencia, otra para insertar
+    expect(fs.readFileSync).toHaveBeenCalledWith(
+      path.join(mockTrajectoriesDirPath, 'file2.txt'),
+      'utf-8'
+    );
+    expect(pool.query).toHaveBeenCalledWith('BEGIN');
+    expect(pool.query).toHaveBeenCalledWith('COMMIT');
   });
-}); */
+
+  it('should handle taxi ID not existing', async () => {
+    const mockTrajectoriesDirPath = '/mock/path/to/trajectories';
+    const mockFiles = ['file1.txt'];
+    const mockFileData = '1,2023-01-01,40.7128,-74.0060';
+
+    path.join.mockReturnValue(mockTrajectoriesDirPath);
+    fs.readdirSync.mockReturnValue(mockFiles);
+    fs.statSync.mockReturnValue({ isFile: () => true });
+    fs.readFileSync.mockReturnValue(mockFileData);
+    taxiIdExists.mockResolvedValue(false);
+    pool.query.mockResolvedValue({});
+
+    await loadTrajectoriesData();
+
+    expect(fs.readdirSync).toHaveBeenCalledWith(mockTrajectoriesDirPath);
+    expect(fs.readFileSync).toHaveBeenCalledWith(
+      path.join(mockTrajectoriesDirPath, 'file1.txt'),
+      'utf-8'
+    );
+    expect(pool.query).toHaveBeenCalledWith('BEGIN');
+    expect(pool.query).toHaveBeenCalledWith('COMMIT');
+  });
+
+  it('should handle errors during the load process', async () => {
+    const mockTrajectoriesDirPath = '/mock/path/to/trajectories';
+    const mockFiles = ['file1.txt'];
+    const mockFileData = '1,2023-01-01,40.7128,-74.0060';
+
+    path.join.mockReturnValue(mockTrajectoriesDirPath);
+    fs.readdirSync.mockReturnValue(mockFiles);
+    fs.statSync.mockReturnValue({ isFile: () => true });
+    fs.readFileSync.mockReturnValue(mockFileData);
+    taxiIdExists.mockResolvedValue(true);
+    pool.query.mockRejectedValue(new Error('DB Error'));
+
+    await expect(loadTrajectoriesData()).rejects.toThrow('DB Error');
+
+    expect(pool.query).toHaveBeenCalledWith('ROLLBACK');
+  });
+});
