@@ -9,7 +9,10 @@ module.exports = {
     console.log('Iniciando carga de datos de trayectorias...');
 
     // Define la ruta al directorio que contiene los archivos .txt.
-    const trajectoriesDirPath = path.join(__dirname, '../../data/trajectories');
+    const trajectoriesDirPath = path.join(
+      __dirname,
+      '../../data/trajectories2'
+    );
     console.log('__dirname:', __dirname);
     console.log('trajectoriesDirPath:', typeof trajectoriesDirPath);
 
